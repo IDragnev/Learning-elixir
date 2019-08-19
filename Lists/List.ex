@@ -160,7 +160,26 @@ defmodule MyList do
   end
 
   def count(list) when is_list(list) do
-    count_if(list, fn _ -> true end)
+    count_if(list, (fn _ -> true end))
+  end
+
+  def member(list, x)
+  def member([], _), do: false
+  def member([x | _], x), do: true
+  def member([_ | tail], x) do
+    member(tail, x)
+  end
+
+  def unique(list)
+  def unique([]) do
+    []
+  end
+  def unique([h | tail]) do
+    if member(tail, h) do
+      unique(tail)
+    else
+      [h | unique(tail)]
+    end
   end
 
 end
