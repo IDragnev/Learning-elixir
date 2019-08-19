@@ -123,7 +123,7 @@ defmodule MyList do
   end
 
   def accConcat(lhs, rhs) do
-    foldl &insert_back/2, lhs, rhs
+    foldl(&insert_back/2, lhs, rhs)
   end 
 
   def reverse(list)
@@ -143,7 +143,7 @@ defmodule MyList do
   end
 
   def accReverse(list) do
-    foldl &insert_front/2, [], list
+    foldl(&insert_front/2, [], list)
   end
   
 end
