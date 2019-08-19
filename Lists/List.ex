@@ -66,10 +66,10 @@ defmodule MyList do
     zip_with(&{ &1, &2 }, lhs, rhs)
   end
 
-  def map(f, list)
-  def map(_, []), do: []
-  def map(f, [head | tail]) do
-    [f.(head) | map(f, tail) ]
+  def map(list, f)
+  def map([], _), do: []
+  def map([head | tail], f) do
+    [f.(head) | map(tail, f) ]
   end
 
   def filter(predicate, list)
@@ -146,4 +146,21 @@ defmodule MyList do
     foldl(&insert_front/2, [], list)
   end
   
+  def product(list) do
+    foldl(&(&1 * &2), 1, list)
+  end
+
+  def sum(list) do
+    foldl(&(&1 + &2), 0, list)
+  end
+
+  def count_if(list, pred) when is_list(list) do
+    list |> map(&(if pred.(&1) do 1 else 0 end))
+         |> sum()
+  end
+
+  def count(list) when is_list(list) do
+    count_if(list, fn _ -> true end)
+  end
+
 end
