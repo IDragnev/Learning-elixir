@@ -115,8 +115,8 @@ defmodule MyList do
   end
 
   def concat(lhs, rhs)
-  def concat(_, []) do
-    []
+  def concat(lhs, []) do
+    lhs
   end
   def concat(lhs, [h | tail]) do
     concat(insert_back(lhs, h), tail)
