@@ -159,7 +159,7 @@ defmodule MyList do
          |> sum()
   end
 
-  def count(list) when is_list(list) do
+  def length(list) when is_list(list) do
     count_if(list, (fn _ -> true end))
   end
 
@@ -180,6 +180,29 @@ defmodule MyList do
     else
       [h | unique(tail)]
     end
+  end
+
+  def enumFromTo(from, to)
+  def enumFromTo(from, to) when from > to do 
+    []
+  end
+  def enumFromTo(from, to) do
+    [from | enumFromTo(from + 1, to)]
+  end
+
+  def replicate(value, times) do
+    enumFromTo(1, times) |> map(fn _ -> value end)
+  end
+
+  def flatten(list)
+  def flatten([]) do
+    []
+  end
+  def flatten([h | tail]) when not(is_list(h)) do
+    [h | flatten(tail)]
+  end
+  def flatten([h | tail]) do
+    flatten(h) ++ flatten(tail)
   end
 
 end
