@@ -8,8 +8,16 @@ defmodule Graph do
     Map.keys g.vertices
   end
 
+  def edges(g = %Graph{}) do
+    for u <- vertices_to_list(g) do
+      %{ ^u => neighbours } = g.vertices
+      neighbours |> Enum.map(&{u, &1})
+    end 
+     |> List.flatten()
+  end
+
   def has_vertices?(g = %Graph{}, vertices) when is_list(vertices) do
-    vertices |> Enum.all?(&(has_vertex(g, &1)))
+    vertices |> Enum.all?(&(has_vertex?(g, &1)))
   end
 
   def has_vertex?(g = %Graph{}, v) do
@@ -17,15 +25,11 @@ defmodule Graph do
   end
 
   def has_edges?(g = %Graph{}, edges) when is_list(edges) do
-    edges |> Enum.all?(fn {u, v} -> has_edge?(g, u, v) end)
+    edges |> Enum.all?(&(has_edge?(g, &1)))
   end
 
-  def has_edge?(g = %Graph{}, u, v) do
-    if (has_vertex? g, u) do
-      v in neighbours(g, u)
-    else
-      false
-    end
+  def has_edge?(g = %Graph{}, {u, v}) do
+    has_vertex?(g, u) and (v in neighbours(g, u))
   end
 
   def neighbours(g = %Graph{}, v) do
@@ -40,7 +44,7 @@ defmodule Graph do
     end
   end
    
-  def insert_edge(g = %Graph{}, u, v) do    
+  def insert_edge(g = %Graph{}, {u, v}) do    
     insert_neighbours = fn to_insert ->
       fn 
         nil        -> {nil, to_insert}
@@ -53,9 +57,9 @@ defmodule Graph do
   end
 
   def remove_edge(g = %Graph{}, {u, v}) do
-    if [u, v] |> Enum.all?(&(has_vertex?(g, &1))) do
+    if has_vertices?(g, [u, v]) do
       remove_v = fn 
-         neighbours -> {neighbours, neighbours |> List.delete(v)} 
+         u_neighbours -> {u_neighbours, u_neighbours |> List.delete(v)} 
       end
       {_, newVertices} = g.vertices |> Map.get_and_update(u, remove_v)
       %Graph{ id: g.id, vertices: newVertices }
@@ -65,9 +69,14 @@ defmodule Graph do
   end
 
   def remove_vertex(g = %Graph{}, v) do
-    g2 = %Graph{ g.id, g.vertices |> Map.delete(v) }
-    vertices_to_list(g2) |> 
-      List.foldl(g2, fn result, w -> remove_edge(result, w, v) end)
+    drop_v = fn 
+      g2 -> %Graph{ g2 | vertices: g2.vertices |> Map.delete(v) } 
+    end
+    g |> vertices_to_list()
+      |> List.delete(v)
+      |> List.foldl(g, &(remove_edge(&2, {&1, v})))
+      |> drop_v.()
   end
+
 end
 
