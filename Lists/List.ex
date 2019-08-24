@@ -205,4 +205,25 @@ defmodule MyList do
     flatten(h) ++ flatten(tail)
   end
 
+  def sort([]) do
+    []
+  end
+  def sort([h | tail]) do
+    sort(filter(&(&1 <= h), tail)) ++ 
+    [h] ++
+    sort(filter(&(&1 > h), tail))
+  end
+
+  def all_of(list, predicate) do
+    count_if(list, predicate) == MyList.length(list)
+  end
+
+  def inverse(predicate) do
+    &(not(predicate.(&1)))
+  end
+
+  def any_of(list, predicate) do
+    not(all_of(list, inverse(predicate)))
+  end
+
 end
