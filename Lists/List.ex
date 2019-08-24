@@ -227,4 +227,18 @@ defmodule MyList do
     not(all_of(list, inverse(predicate)))
   end
 
+  def split(list, index) do
+    {take(index, list), drop(index, list)}
+  end
+
+  def flip(f) when is_function(f), do: &(f.(&2, &1))
+
+  def scanl(list, acc, fun) do
+    f = fn
+      acc, current -> acc |> head()
+                          |> fun.(current)
+                          |> flip(&insert_front/2).(acc)
+    end
+    foldl(f, [acc], list) |> reverse() |> tail()
+  end
 end
