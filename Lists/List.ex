@@ -72,15 +72,16 @@ defmodule MyList do
     [f.(head) | map(tail, f) ]
   end
 
-  def filter(predicate, list)
-  def filter(_, []) do
+  def filter(list, predicate)
+  def filter([], _) do
     []
   end
-  def filter(predicate, [head | tail]) do
+  def filter([head | tail], predicate) do
+    filteredTail = filter(tail, predicate)
     if predicate.(head) do
-      [head | filter(predicate, tail)]
+      [head | filteredTail]
     else
-      filter(predicate, tail)
+      filteredTail
     end
   end
 
@@ -209,9 +210,9 @@ defmodule MyList do
     []
   end
   def sort([h | tail]) do
-    sort(filter(&(&1 <= h), tail)) ++ 
-    [h] ++
-    sort(filter(&(&1 > h), tail))
+    sortedLeft = tail |> filter(&(&1 <= h))
+    sortedRight = tail |> filter(&(&1 > h))
+    sortedLeft ++ [h | sortedRight]
   end
 
   def all_of(list, predicate) do
