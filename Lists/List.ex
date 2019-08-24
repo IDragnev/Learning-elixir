@@ -28,16 +28,20 @@ defmodule MyList do
     [h | remove_ocurrances(tail, x)]
   end
 
-  def foldl(op, acc, list)
-  def foldl(_, acc, []), do: acc
-  def foldl(op, acc, [h | tail]) do
-    foldl(op, op.(acc, h), tail)
+  def foldl(list, acc, op)
+  def foldl([], acc, _) do
+    acc
+  end
+  def foldl([h | tail], acc, op) do
+    foldl(tail, op.(acc, h), op)
   end
 
-  def foldr(op, acc, list)
-  def foldr(_, acc, []), do: acc
-  def foldr(op, acc, [h | tail]) do
-    op.(h, foldr(op, acc, tail))
+  def foldr(list, acc, op)
+  def foldr([], acc, _) do
+    acc
+  end
+  def foldr([h | tail], acc, op) do
+    op.(h, foldr(tail, acc, op))
   end
 
   def wrap(term)
@@ -124,7 +128,7 @@ defmodule MyList do
   end
 
   def accConcat(lhs, rhs) do
-    foldl(&insert_back/2, lhs, rhs)
+    rhs |> foldl(lhs, &insert_back/2)
   end 
 
   def reverse(list)
@@ -144,15 +148,15 @@ defmodule MyList do
   end
 
   def accReverse(list) do
-    foldl(&insert_front/2, [], list)
+    list |> foldl([], &insert_front/2)
   end
   
   def product(list) do
-    foldl(&(&1 * &2), 1, list)
+    list |> foldl(1, &(&1 * &2))
   end
 
   def sum(list) do
-    foldl(&(&1 + &2), 0, list)
+    list |> foldl(0, &(&1 + &2))
   end
 
   def count_if(list, pred) when is_list(list) do
@@ -239,6 +243,8 @@ defmodule MyList do
                           |> fun.(current)
                           |> flip(&insert_front/2).(acc)
     end
-    foldl(f, [acc], list) |> reverse() |> tail()
+    list |> foldl([acc], f) 
+         |> reverse() 
+         |> tail()
   end
 end
