@@ -13,7 +13,7 @@ defmodule Graph do
       %{ ^u => neighbours } = g.vertices
       neighbours |> Enum.map(&{u, &1})
     end 
-     |> List.flatten()
+     |> Enum.concat()
   end
 
   def has_vertices?(g = %Graph{}, vertices) when is_list(vertices) do
@@ -21,7 +21,7 @@ defmodule Graph do
   end
 
   def has_vertex?(g = %Graph{}, v) do
-    Map.has_key? g.vertices, v
+    g.vertices |> Map.has_key?(v)
   end
 
   def has_edges?(g = %Graph{}, edges) when is_list(edges) do

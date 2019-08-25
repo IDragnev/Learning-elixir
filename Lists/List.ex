@@ -89,26 +89,26 @@ defmodule MyList do
     end
   end
 
-  def take(n, list)
-  def take(_, []) do
+  def take(list, n)
+  def take([], _) do
     []
   end
-  def take(0, _) do
+  def take(_, 0) do
     []
   end
-  def take(n, [head | tail]) do
-    [head | take(n - 1, tail)]
+  def take([head | tail], n) do
+    [head | take(tail, n - 1)]
   end
 
-  def drop(n, list)
-  def drop(_, []) do
+  def drop(list, n)
+  def drop([], _) do
     []
   end
-  def drop(0, list) do
+  def drop(list, 0) do
     list
   end
-  def drop(n, [_ | tail]) do
-   drop(n - 1, tail)
+  def drop([_ | tail], n) do
+   drop(tail, n - 1)
   end
   
   def insert_back(list, x)
@@ -124,7 +124,8 @@ defmodule MyList do
     lhs
   end
   def concat(lhs, [h | tail]) do
-    concat(insert_back(lhs, h), tail)
+    lhs |> insert_back(h)
+        |> concat(tail)
   end
 
   def accConcat(lhs, rhs) do
@@ -136,7 +137,8 @@ defmodule MyList do
     []
   end
   def reverse([h | tail]) do
-    insert_back(reverse(tail), h)
+    tail |> reverse()
+         |> insert_back(h)
   end
 
   def insert_front(list, x)
@@ -214,8 +216,10 @@ defmodule MyList do
     []
   end
   def sort([h | tail]) do
-    sortedLeft = tail |> filter(&(&1 <= h))
-    sortedRight = tail |> filter(&(&1 > h))
+    sortedLeft  = tail |> filter(&(&1 <= h)) 
+                       |> sort()
+    sortedRight = tail |> filter(&(&1 > h)) 
+                       |> sort()
     sortedLeft ++ [h | sortedRight]
   end
 
@@ -232,7 +236,7 @@ defmodule MyList do
   end
 
   def split(list, index) do
-    {take(index, list), drop(index, list)}
+    {take(list, index), drop(list, index)}
   end
 
   def flip(f) when is_function(f), do: &(f.(&2, &1))
