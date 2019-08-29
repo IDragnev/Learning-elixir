@@ -61,7 +61,7 @@ defmodule MyList do
   end
   def zip_with(_, _, []) do
     []
-  end 
+  end
   def zip_with(f, [h1 | tail1], [h2 | tail2]) do
     [ f.(h1, h2) | zip_with(f, tail1, tail2) ]
   end
@@ -100,6 +100,10 @@ defmodule MyList do
     [head | take(tail, n - 1)]
   end
 
+  def take_while(list, pred) do
+    list |> foldr([], fn x, acc -> if pred.(x) do [x | acc] else [] end end)
+  end
+
   def drop(list, n)
   def drop([], _) do
     []
@@ -110,7 +114,18 @@ defmodule MyList do
   def drop([_ | tail], n) do
    drop(tail, n - 1)
   end
-  
+
+  def drop_while([], _) do
+    []
+  end
+  def drop_while(list = [h | tail], pred) do
+    if pred.(h) do
+      drop_while(tail, pred)
+    else
+      list
+    end
+  end
+
   def insert_back(list, x)
   def insert_back([], x) do
     [x]
@@ -130,7 +145,7 @@ defmodule MyList do
 
   def accConcat(lhs, rhs) do
     rhs |> foldl(lhs, &insert_back/2)
-  end 
+  end
 
   def reverse(list)
   def reverse([]) do
@@ -152,7 +167,7 @@ defmodule MyList do
   def accReverse(list) do
     list |> foldl([], &insert_front/2)
   end
-  
+
   def product(list) do
     list |> foldl(1, &(&1 * &2))
   end
@@ -190,7 +205,7 @@ defmodule MyList do
   end
 
   def enumFromTo(from, to)
-  def enumFromTo(from, to) when from > to do 
+  def enumFromTo(from, to) when from > to do
     []
   end
   def enumFromTo(from, to) do
@@ -216,9 +231,9 @@ defmodule MyList do
     []
   end
   def sort([h | tail]) do
-    sortedLeft  = tail |> filter(&(&1 <= h)) 
+    sortedLeft  = tail |> filter(&(&1 <= h))
                        |> sort()
-    sortedRight = tail |> filter(&(&1 > h)) 
+    sortedRight = tail |> filter(&(&1 > h))
                        |> sort()
     sortedLeft ++ [h | sortedRight]
   end
@@ -247,8 +262,34 @@ defmodule MyList do
                           |> fun.(current)
                           |> flip(&insert_front/2).(acc)
     end
-    list |> foldl([acc], f) 
-         |> reverse() 
+    list |> foldl([acc], f)
+         |> reverse()
          |> tail()
   end
+
+  def min(list, default \\nil)
+  def min([], default) do
+    default
+  end
+  def min([h | tail], _) do
+    tail |> foldl(h, &Kernel.min/2)
+  end
+
+  def max(list, default \\nil)
+  def max([], default) do
+    default
+  end
+  def max([h | tail], _) do
+    tail |> foldl(h, &Kernel.max/2)
+  end
+
+  def chunk(list, chunk_size)
+  def chunk([], _) do
+    []
+  end
+  def chunk(list, n) when n > 0 do
+    [take(list, n) | (list |> drop(n) |> chunk(n))]
+  end
+
 end
+
