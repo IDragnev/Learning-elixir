@@ -1,6 +1,6 @@
 defmodule Graph do
   #the graphs are represented with maps:
-  #the keys are vertex ids and the values are 
+  #the keys are vertex ids and the values are
   #their neighbours' ids
   defstruct id: "", vertices: %{}
 
@@ -12,7 +12,7 @@ defmodule Graph do
     for u <- vertices_to_list(g) do
       %{ ^u => neighbours } = g.vertices
       neighbours |> Enum.map(&{u, &1})
-    end 
+    end
      |> Enum.concat()
   end
 
@@ -33,7 +33,7 @@ defmodule Graph do
   end
 
   def neighbours(g = %Graph{}, v) do
-     Map.get g.vertices, v
+     g.vertices |> Map.get(v)
   end
 
   def insert_vertex(g = %Graph{}, v, neighbours \\[]) do
@@ -43,10 +43,10 @@ defmodule Graph do
       %Graph{ id: g.id, vertices: Map.put(g.vertices, v, neighbours) }
     end
   end
-   
-  def insert_edge(g = %Graph{}, {u, v}) do    
+
+  def insert_edge(g = %Graph{}, {u, v}) do
     insert_neighbours = fn to_insert ->
-      fn 
+      fn
         nil        -> {nil, to_insert}
         neighbours -> {neighbours, neighbours ++ to_insert}
       end
@@ -58,8 +58,8 @@ defmodule Graph do
 
   def remove_edge(g = %Graph{}, {u, v}) do
     if has_vertices?(g, [u, v]) do
-      remove_v = fn 
-         u_neighbours -> {u_neighbours, u_neighbours |> List.delete(v)} 
+      remove_v = fn
+         u_neighbours -> {u_neighbours, u_neighbours |> List.delete(v)}
       end
       {_, newVertices} = g.vertices |> Map.get_and_update(u, remove_v)
       %Graph{ id: g.id, vertices: newVertices }
@@ -69,13 +69,37 @@ defmodule Graph do
   end
 
   def remove_vertex(g = %Graph{}, v) do
-    drop_v = fn 
-      g2 -> %Graph{ g2 | vertices: g2.vertices |> Map.delete(v) } 
+    drop_v = fn
+      g2 -> %Graph{ g2 | vertices: g2.vertices |> Map.delete(v) }
     end
     g |> vertices_to_list()
       |> List.delete(v)
-      |> List.foldl(g, &(remove_edge(&2, {&1, v})))
+      |> List.foldl(g, &remove_edge(&2, {&1, v}))
       |> drop_v.()
+  end
+
+  def from_file(filename) do
+    %{ "id" => [id], "v" => vertices, "e" => edges } = filename |> file_contents_as_map()
+    g = vertices |> List.foldl(%Graph{id: id}, &insert_vertex(&2, &1))
+    edges |> Enum.map(&edge_from_string/1)
+          |> List.foldl(g, &insert_edge(&2, &1))
+  end
+
+  defp file_contents_as_map(filename) do
+    filename  |> File.open()
+              |> (fn {:ok, file} -> file end).()
+              |> IO.stream(:line)
+              |> Stream.map(&String.trim_trailing(&1))
+              |> Stream.map(&String.split(&1,": "))
+              |> Enum.group_by(fn [id, _] -> id end,
+                               fn [_, value] -> value end)
+  end
+
+  defp edge_from_string(str) do
+    str |> String.trim("{")
+        |> String.trim("}")
+        |> String.split(", ")
+        |> List.to_tuple()
   end
 
 end
