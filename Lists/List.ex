@@ -76,6 +76,17 @@ defmodule MyList do
     [f.(head) | map(tail, f) ]
   end
 
+  def pmap(collection, fun) do
+    me = self()
+    collection
+    |> Enum.map(&spawn_link(fn -> send me, {self(), fun.(&1)} end))
+    |> Enum.map(fn pid ->
+      receive do
+        {^pid, mapped_elem} ->mapped_elem
+      end
+    end)
+  end
+
   def filter(list, predicate)
   def filter([], _) do
     []
